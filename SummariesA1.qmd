@@ -1,0 +1,218 @@
+---
+title: "Summaries"
+author: "Anhad"
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+The ***skim*** function is to get a rough idea of the data - a literal
+skim.
+
+```{r}
+skimr::skim(mpg) 
+```
+
+Here's our data - showing the first 10 entries.
+
+```{r}
+mpg %>% 
+  head(10)
+```
+
+Here's a ***glimpse*** of our dataset.
+
+```{r}
+glimpse(mpg)
+```
+
+***Inspecting*** the data gives us a slightly more detailed summary
+compared to glimpse.
+
+```{r}
+inspect(mpg)
+```
+
+## Intro
+
+## This is our classwork on summarizing data.
+
+Setup chunk:
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+library(kableExtra)
+library(babynames)
+```
+
+### Data:
+
+```{r}
+mpg %>%
+  head(10) %>%
+  kbl(
+    # add Human Readable column names
+    col.names = c(
+      "Manufacturer", "Model", "Engine\nDisplacement",
+      "Model\n Year", "Cylinders", "Transmission",
+      "Drivetrain", "City\n Mileage", "Highway\n Mileage",
+      "Fuel", "Class\nOf\nVehicle"
+    ),
+    caption = "MPG Dataset"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped", "hover",
+      "condensed", "responsive"
+    ),
+    full_width = F, position = "center"
+  )
+```
+
+### Mutating
+
+```{r}
+mpg_modified <- mpg %>%
+  dplyr::mutate(
+    cyl = as_factor(cyl),
+    fl = as_factor(fl),
+    drv = as_factor(drv),
+    class = as_factor(class),
+    trans = as_factor(trans)
+  )
+glimpse(mpg_modified)
+```
+
+### Counts
+
+```{r}
+mpg_modified %>% dplyr::count(cyl)
+```
+
+```{r}
+mpg_modified %>% mosaic::count(drv) # does the same thing! Counts!
+```
+
+```{r}
+mpg_modified %>% count(fl)
+```
+
+```{r}
+### All combinations of cut, color, clarity
+### Overwhelming??
+mpg_modified %>%
+  count(across(where(is.factor)))
+```
+
+### Finding out the averages
+
+```{r}
+mpg_modified %>%
+  group_by(cyl) %>%
+  summarize(average_hwy = mean(hwy), count = n())
+```
+
+```{r}
+mpg_modified %>%
+  group_by(cyl, fl) %>%
+  summarize(average_hwy = mean(hwy), count = n())
+```
+
+Skim output for mpg dataset
+
+```{r}
+skimr::skim(mpg) %>%
+  kbl(align = "c", caption = "Skim Output for mpg Dataset") %>%
+  kable_paper(full_width = F)
+```
+
+# My turn (Math anxiety dataset)
+
+```{r}
+math_anxiety <- read_delim("../../data/MathAnxiety.csv")
+math_anxiety
+```
+
+### Finding averages based on types of anxiety
+
+```{r}
+math_anxiety %>% 
+  group_by(Gender) %>% 
+  summarise(average_AMAS=mean(AMAS), count=n())
+```
+
+```{r}
+math_anxiety %>% 
+  group_by(Gender) %>% 
+  summarise(average_RCMAS=mean(RCMAS), count=n())
+
+```
+
+### Summarizing Math anxiety data
+
+```{r}
+skimr::skim(math_anxiety)
+
+```
+
+```{r}
+inspect(math_anxiety)
+
+```
+
+```{r}
+glimpse(math_anxiety)
+
+```
+
+### Mutating and summarizing the dataset
+
+```{r}
+math_anxiety_modified <- math_anxiety %>%
+  dplyr::mutate(
+    Gender = as_factor(Gender),
+    Grade = as_factor(Grade),
+    )
+
+glimpse(math_anxiety_modified)
+
+```
+
+```{r}
+math_anxiety_modified %>% dplyr::count(Gender)
+
+```
+
+```{r}
+math_anxiety_modified %>% mosaic::count(Grade) 
+
+```
+
+```{r}
+math_anxiety_modified %>%
+  count(across(where(is.factor)))
+
+```
+
+```{r}
+math_anxiety %>%
+  head(10) %>%
+  kbl(
+    col.names = c(
+      "Age", "Gender", "Grade",
+      "AMAS Score", "RCMAS Score", "Arithmetic Score"
+    ),
+    longtable = FALSE, centering = TRUE,
+    caption = "Math Anxiety Dataset"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped", "hover",
+      "condensed", "responsive"
+    ),
+    full_width = FALSE, position="center"
+)
+```

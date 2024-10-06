@@ -1,0 +1,273 @@
+|                                   |
+|-----------------------------------|
+| title: "class 3 counts and stuff" |
+| author: "anhad"                   |
+
+Setup chunk:
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(skimr)
+library(kableExtra)
+```
+
+## Taxi dataset
+
+```{r}
+taxi <- read_csv("https://vincentarelbundock.github.io/Rdatasets/csv/modeldata/taxi.csv")
+taxi
+```
+
+### Inspecting the dataset
+
+```{r}
+glimpse(taxi)
+```
+
+```{r}
+skim(taxi) %>% kbl()
+```
+
+```{r}
+inspect(taxi)
+```
+
+### Mutating the dataset
+
+```{r}
+## Convert `dow`, `local`, and `month` into ordered factors
+taxi_modified <- taxi %>%
+  mutate(
+    dow = factor(dow,
+      levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+      labels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+      ordered = TRUE
+    ),
+    ##
+    local = factor(local,
+      levels = c("no", "yes"),
+      labels = c("no", "yes"),
+      ordered = TRUE
+    ),
+    ##
+    month = factor(month,
+      levels = c("Jan", "Feb", "Mar", "Apr"),
+      labels = c("Jan", "Feb", "Mar", "Apr"),
+      ordered = TRUE
+    )
+  )
+taxi_modified %>% glimpse()
+```
+
+### Q1. Do people tip or not?
+
+```{r}
+
+gf_bar(~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot A: Counts of Tips")
+
+ggplot(taxi_modified)  + 
+  geom_bar(aes(x = tip)) + 
+  labs(title = "Plot 1A: Counts of Tips")
+```
+
+#### Inferences are
+
+Most people tip :)
+
+### Q2. Does the tip depend on whether the trip is local or not?
+
+```{r}
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "dodge") %>% 
+  gf_labs(title = "Dodged Bar Chart")
+##
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "stack") %>% 
+  gf_labs(title = "Stacked Bar Chart",
+          subtitle = "Can we spot per group differences in proportions??")
+
+## Showing "per capita" percentages
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = " Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!")
+## Showing "per capita" percentages
+## Better labelling of Y-axis
+taxi_modified %>% 
+  gf_props(~ local, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = " Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!")
+```
+
+#### Inferences are
+
+Local cab services get paid less.
+
+### Q3. Do some companies get more tips than others?
+
+```{r}
+
+taxi_modified %>% 
+  gf_bar(~ company, color = ~ tip, position = "dodge") %>% 
+  gf_labs(title = "Plot 2A: Dodged Bar Chart") %>% 
+  gf_theme(theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)))
+##
+taxi_modified %>% 
+  gf_bar(~ company, fill = ~ tip, position = "stack") %>% 
+  gf_labs(title = "Plot 2B: Stacked Bar Chart",
+          subtitle = "Can we spot per group differences in proportions??") %>% 
+  gf_theme(theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)))
+## Showing "per capita" percentages
+taxi_modified %>% 
+  gf_bar(~ company, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = "Plot 2C: Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!") %>% 
+  gf_theme(theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)))
+## Showing "per capita" percentages
+## Better labelling of Y-axis
+taxi_modified %>% 
+  gf_props(~ company, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = "Plot 2D: Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!") %>% 
+  gf_theme(theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)))
+```
+
+```         
+```
+
+#### Inferences are
+
+Yes, other companies are paid more, followed by Taxi Affiliation Services.
+
+```{r}
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "dodge") %>% 
+  gf_labs(title = "Dodged Bar Chart")
+##
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "stack") %>% 
+  gf_labs(title = "Stacked Bar Chart",
+          subtitle = "Can we spot per group differences in proportions??")
+
+## Showing "per capita" percentages
+taxi_modified %>% 
+  gf_bar(~ local, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = " Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!")
+## Showing "per capita" percentages
+## Better labelling of Y-axis
+taxi_modified %>% 
+  gf_props(~ local, fill = ~ tip, position = "fill") %>% 
+  gf_labs(title = " Filled Bar Chart",
+          subtitle = "Shows Per group differences in Proportions!")
+```
+
+### 
+
+```         
+```
+
+### Q4. Does a tip depend on the distance, hour, day of week and month?
+
+```{r}
+gf_bar(~ tip,fill = ~local, data = taxi_modified, position = "dodge",) %>%
+  gf_labs(title = "Plot A: Counts of Tips")
+
+gf_bar(~ hour, fill = ~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot B: Counts of Tips by Hour")
+##
+gf_bar(~ dow, fill = ~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot C: Counts of Tips by Day of Week")
+##
+gf_bar(~ month, fill = ~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot D: Counts of Tips by Month")
+
+##
+gf_bar(~ month | dow, fill = ~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot E: Counts of Tips by Day of Week and Month")
+##
+## This may be too busy a graph...
+gf_bar(~ dow | hour, fill = ~ tip, data = taxi_modified) %>%
+  gf_labs(title = "Plot F: Counts of Tips by Hour and Day of Week",
+          subtitle = "Is this plot arrangement easy to grasp?")
+## This is better!
+gf_bar(~ hour | dow, fill = ~ tip, data = taxi) %>%
+  gf_labs(title = "Plot G: Counts of Tips by Hour and Day of Week",
+          subtitle = "Swapped the Facets")
+```
+
+#### Inferences are
+
+People tip most at 04:00PM and least at 03:00AM.
+
+People tip most on Thursdays and least on Sundays.
+
+People tip most in the month of April and least in the month of January.
+
+The highest chance of getting a good tip is on Wednesdays and Thursdays in March, and the lowest chance is a Sunday in January.
+
+```         
+```
+
+## My turn (Apartments dataset)
+
+```{r}
+apartments <- read_delim("../../posts/data/apartments.csv")
+apartments
+ggplot(apartments, aes(x = GrLivArea, y = SalePrice)) +
+  geom_point() +
+  labs(title = "Sale Price vs. Ground Living Area",
+       x = "Ground Living Area (sq ft)",
+       y = "Sale Price ($)") +
+  theme_minimal()
+ggplot(apartments, aes(x = SalePrice)) +
+  geom_histogram(binwidth = 10000, fill = "blue", color = "black") +
+  labs(title = "Distribution of Sale Prices",
+       x = "Sale Price ($)",
+       y = "Frequency") +
+  theme_minimal()
+
+
+```
+
+```{r}
+inspect(apartments)
+```
+
+```{r}
+glimpse(apartments)
+```
+
+```{r}
+skim(apartments)
+```
+
+#### Inferences
+
+The highest price is 345,000 but it the ground live area is 2324, and the highest grlivearea is 2376 but the price is 325300.
+
+```{r}
+library(dplyr)
+
+# Read the CSV file
+apartments <- read_delim("apartments.csv")
+
+# Mutate the dataset by adding a new column
+apartments <- apartments %>%
+  mutate(PricePerSqFt = SalePrice / GrLiveArea)
+
+# Save the mutated dataset back to a CSV file (optional)
+write.csv(apartments, "mutated_apartments.csv", row.names = FALSE)
+
+```
+
+Data doesn't need to be mutated since it's not qualitative data.
+
+```         
+```
+
+```         
+```
